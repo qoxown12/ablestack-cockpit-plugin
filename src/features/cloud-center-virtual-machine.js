@@ -111,68 +111,76 @@ class CloudCenterVirtualMachine {
             let vms = obj
             // let a = ccvm_instance.createDescriptionListText("span-cloud-vm-status", 'red', '인스턴스를 찾을 수 없습니다.');
             // status_span[0].children[0].replaceWith(a)
-            vms.forEach(function (vm) {
-                if (vm.Name == ccvm_instance.Name) {
-                    $("#div-cloud-vm-cpu-text").text(
-                        vm['CPU(s)'] + " vCore"
-                    );
-                    $("#div-cloud-vm-memory-text").text(
-                        ccvm_instance.byteCalculation(ccvm_instance.toBytes(vm['Max memory']))
-                    );
-                    $("#div-cloud-vm-disk-text").text(
-                        vm['DISK_CAP'] + " (사용가능 " +vm['DISK_PHY'] + " / 사용률 " + vm['DISK_USAGE_RATE'] + ")"
-                    );
-                    $("#div-cloud-vm-nic-type-text").text(
-                        "NIC Type : " + vm['nictype'] + " (Parent : " + vm['nicbridge'] + ")"
-                    );
-                    $("#div-cloud-vm-nic-ip-text").text(
-                        "IP : " + vm['ip']
-                    );
-                    $("#div-cloud-vm-nic-gw-text").text(
-                        "GW : " + vm['GW']
-                    );
-                    $("#div-cloud-vm-nic-dns-text").text(
-                        "DNS : " + vm['DNS']
-                    );
-                    $("#div-cloud-vm-nic-prefix-text").text(
-                        "PREFIX : " + vm['prefix']
-                    );
-                    if(vm['MOLD_SERVICE_STATUE'] == "active"){
-                        $("#div-mold-service-status").text("실행중");
+            if(obj.length > 0){
+                vms.forEach(function (vm) {
+                    if (vm.Name == ccvm_instance.Name) {
+                        $("#div-cloud-vm-cpu-text").text(
+                            vm['CPU(s)'] + " vCore"
+                        );
+                        $("#div-cloud-vm-memory-text").text(
+                            ccvm_instance.byteCalculation(ccvm_instance.toBytes(vm['Max memory']))
+                        );
+                        $("#div-cloud-vm-disk-text").text(
+                            vm['DISK_CAP'] + " (사용가능 " +vm['DISK_PHY'] + " / 사용률 " + vm['DISK_USAGE_RATE'] + ")"
+                        );
+                        $("#div-cloud-vm-nic-type-text").text(
+                            "NIC Type : " + vm['nictype'] + " (Parent : " + vm['nicbridge'] + ")"
+                        );
+                        $("#div-cloud-vm-nic-ip-text").text(
+                            "IP : " + vm['ip']
+                        );
+                        $("#div-cloud-vm-nic-gw-text").text(
+                            "GW : " + vm['GW']
+                        );
+                        $("#div-cloud-vm-nic-dns-text").text(
+                            "DNS : " + vm['DNS']
+                        );
+                        $("#div-cloud-vm-nic-prefix-text").text(
+                            "PREFIX : " + vm['prefix']
+                        );
+                        if(vm['MOLD_SERVICE_STATUE'] == "active"){
+                            $("#div-mold-service-status").text("실행중");
+                        }else{
+                            $("#div-mold-service-status").text("정지됨");
+                        }
+                        if(vm['MOLD_DB_STATUE'] == "active"){
+                            $("#div-mold-db-status").text("실행중");
+                        }else{
+                            $("#div-mold-db-status").text("정지됨");
+                        }
+                        if (vm.State == "running") {                        
+                            let a = ccvm_instance.createDescriptionListText("span-cloud-vm-status", 'green', 'Running');
+                            status_span[0].children[0].replaceWith(a)                        
+                        } else {
+                            let a = ccvm_instance.createDescriptionListText("span-cloud-vm-status", 'red', 'Stopped');
+                            status_span[0].children[0].replaceWith(a)                        
+                        }
+                        $('#ccvm-low-info').text('클라우드센터 가상머신이 배포되었습니다.')
+                        $('#ccvm-low-info').attr('style','color: var(--pf-global--success-color--100)')
+                        $('#span-cloud-vm-status').attr('class','pf-c-label pf-m-green');
+                        $('#ccvm_status_icon').attr('class','fas fa-fw fa-check-circle');
+                        sessionStorage.setItem("ccvm_status", vm.State.toUpperCase()); 
+                        ccvm_instance.cpus=vm['CPU(s)']
+                        ccvm_instance.mem=vm['Max memory']
+                        ccvm_instance.disk_cap=vm['DISK_CAP']
+                        ccvm_instance.disk_phy=vm['DISK_PHY']
+                        ccvm_instance.ip=vm['ip'].split('/')[0]
+                        $('#card-action-cloud-vm-change').attr('disabled', true);
+                        $('#button-cloud-vm-snap-rollback').attr('disabled', true);
+                        $('#card-action-cloud-vm-connect').removeClass('pf-m-disabled')
+                        resolve();
                     }else{
-                        $("#div-mold-service-status").text("정지됨");
+                        sessionStorage.setItem("ccvm_status", "HEALTH_ERR");
+                        resolve();
                     }
-                    if(vm['MOLD_DB_STATUE'] == "active"){
-                        $("#div-mold-db-status").text("실행중");
-                    }else{
-                        $("#div-mold-db-status").text("정지됨");
-                    }
-                    if (vm.State == "running") {                        
-                        let a = ccvm_instance.createDescriptionListText("span-cloud-vm-status", 'green', 'Running');
-                        status_span[0].children[0].replaceWith(a)                        
-                    } else {
-                        let a = ccvm_instance.createDescriptionListText("span-cloud-vm-status", 'red', 'Stopped');
-                        status_span[0].children[0].replaceWith(a)                        
-                    }
-                    $('#ccvm-low-info').text('클라우드센터 가상머신이 배포되었습니다.')
-                    $('#ccvm-low-info').attr('style','color: var(--pf-global--success-color--100)')
-                    $('#span-cloud-vm-status').attr('class','pf-c-label pf-m-green');
-                    $('#ccvm_status_icon').attr('class','fas fa-fw fa-check-circle');
-                    sessionStorage.setItem("ccvm_status", vm.State.toUpperCase()); 
-                    ccvm_instance.cpus=vm['CPU(s)']
-                    ccvm_instance.mem=vm['Max memory']
-                    ccvm_instance.disk_cap=vm['DISK_CAP']
-                    ccvm_instance.disk_phy=vm['DISK_PHY']
-                    ccvm_instance.ip=vm['ip'].split('/')[0]
-                    $('#card-action-cloud-vm-change').attr('disabled', true);
-                    $('#button-cloud-vm-snap-rollback').attr('disabled', true);
-                    $('#card-action-cloud-vm-connect').removeClass('pf-m-disabled')
-                    resolve();
-                }else{
-                    sessionStorage.setItem("ccvm_status", "HEALTH_ERR");
-                    resolve();
-                }
-            })
+                })
+            }else{
+                sessionStorage.setItem("ccvm_status", "HEALTH_ERR");
+                let status_span = $("#description-cloud-vm-status");
+                let a = ccvm_instance.createDescriptionListText("span-cloud-vm-status", 'red', 'Health Err');
+                status_span[0].children[0].replaceWith(a)
+                resolve();
+            }
         });
     }
     /*
@@ -229,7 +237,7 @@ class CloudCenterVirtualMachine {
                 // }
                 ccvm_instance.runningHost = obj.val.started;
                 ccvm_instance.clusterdHost = obj.val.clustered_host;
-                var remotePcsStatus = ['/usr/bin/ssh', '-o', 'StrictHostKeyChecking=no', ccvm_instance.runningHost, '/usr/bin/python3', pluginpath +'/python/host/virshlist.py'];
+                var remotePcsStatus = ['/usr/bin/ssh', '-o', 'StrictHostKeyChecking=no', (ccvm_instance.runningHost == null ? pcs_exe_host : ccvm_instance.runningHost), '/usr/bin/python3', pluginpath +'/python/host/virshlist.py'];
                 cockpit.spawn(remotePcsStatus, { host: pcs_exe_host})
                     .then(ccvm_instance.checkVIRSHOK)
                     .catch(ccvm_instance.checkVIRSHERR)
